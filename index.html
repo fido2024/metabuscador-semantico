@@ -45,7 +45,8 @@
       <p style="color:var(--muted); font-family:'Space Mono',monospace; font-size:12px; margin-bottom:16px; text-transform:uppercase; letter-spacing:1px;">
         Cargar Ontología OWL
       </p>
-      <label id="dropzone"
+      <label for="fileInput"
+        id="dropzone"
         style="display:block; border: 2px dashed var(--border); border-radius:16px; padding:40px; cursor:pointer; transition: border-color 0.2s;"
         ondragover="event.preventDefault(); this.style.borderColor='var(--accent)'"
         ondragleave="this.style.borderColor='var(--border)'"
@@ -57,9 +58,9 @@
         <span style="color:var(--muted); font-size:12px; font-family:'Space Mono',monospace;">
           o haz click para seleccionar
         </span>
-        <input type="file" id="fileInput" accept=".owl,.owx,.rdf,.xml"
-               style="display:none" onchange="handleFile(this.files[0])"/>
       </label>
+      <input type="file" id="fileInput" accept=".owl,.owx,.rdf,.xml"
+             style="display:none" onchange="handleFile(this.files[0])"/>
       <p style="margin-top:16px; color:var(--muted); font-size:11px; font-family:'Space Mono',monospace;">
         El archivo se procesa localmente en tu navegador · sin DBMS
       </p>

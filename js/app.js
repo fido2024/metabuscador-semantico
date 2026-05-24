@@ -22,9 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
-  document.getElementById('dropzone').addEventListener('click', () => {
-    document.getElementById('fileInput').click();
-  });
+  // El <label> en el HTML ya conecta con fileInput — sin listener extra aquí
 });
 
 // ══════════════════════════════════════════════
