@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════════════
+   METABUSCADOR SEMÁNTICO — UMSS Web Semántica
+   style.css
+   ══════════════════════════════════════════════ */
 
 /* ── VARIABLES MODO OSCURO (defecto) ── */
 :root {
@@ -168,7 +172,8 @@ h1 {
   position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
   color: var(--muted); font-size: 18px; pointer-events: none;
 }
-#searchInput {
+#searchInput,
+#dbpSearchInput {
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -179,11 +184,13 @@ h1 {
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-#searchInput:focus {
+#searchInput:focus,
+#dbpSearchInput:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(124,106,247,0.15);
 }
-#searchInput::placeholder { color: var(--muted); }
+#searchInput::placeholder,
+#dbpSearchInput::placeholder { color: var(--muted); }
 
 .btn-search {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -378,6 +385,119 @@ pre .comment { color: var(--muted); }
   background: rgba(124,106,247,0.2);
   border-radius: 4px; padding: 1px 6px;
   font-size: 10px; color: var(--accent);
+}
+
+/* ── PESTAÑAS ── */
+.tabs-bar {
+  display: flex; gap: 8px; margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 24px;
+  color: var(--muted);
+  font-size: 14px; font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+  position: relative; bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); background: var(--surface2); }
+.tab-btn.active {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+  border-bottom-color: var(--surface);
+}
+.tab-badge {
+  background: rgba(124,106,247,0.15);
+  border: 1px solid rgba(124,106,247,0.3);
+  border-radius: 100px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+/* ── CARDS DBPEDIA ── */
+.dbp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.dbp-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--accent3), var(--accent));
+}
+.dbp-card:hover {
+  border-color: rgba(0,229,204,0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.dbp-card-top {
+  display: flex; gap: 16px; align-items: flex-start; margin-bottom: 12px;
+}
+.dbp-img {
+  width: 80px; height: 80px; object-fit: cover;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface2); flex-shrink: 0;
+}
+.dbp-img-placeholder {
+  width: 80px; height: 80px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.dbp-info { flex: 1; min-width: 0; }
+.dbp-name {
+  font-size: 17px; font-weight: 700; color: var(--text);
+  margin-bottom: 4px;
+}
+.dbp-type {
+  display: inline-block;
+  background: rgba(0,229,204,0.1);
+  border: 1px solid rgba(0,229,204,0.25);
+  border-radius: 100px; padding: 3px 10px;
+  font-size: 11px; font-family: 'Space Mono', monospace;
+  color: var(--accent3); margin-bottom: 8px;
+}
+.dbp-abstract {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.dbp-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 12px; padding: 6px 14px;
+  background: rgba(0,229,204,0.08);
+  border: 1px solid rgba(0,229,204,0.2);
+  border-radius: 8px;
+  color: var(--accent3); font-size: 12px;
+  font-family: 'Space Mono', monospace;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.dbp-link:hover { background: rgba(0,229,204,0.15); }
+.dbp-props {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px; margin-top: 12px;
+}
+
+/* ── LOADING DBP ── */
+.dbp-loading {
+  text-align: center; padding: 60px 20px;
+  font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted);
 }
 
 /* ── FOOTER ── */
