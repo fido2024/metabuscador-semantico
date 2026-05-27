@@ -224,6 +224,45 @@ async function doSearch() {
 }
 
 function setFilter(cls, btn) {
+  // 1. Leer siempre lo que está escrito en la caja AHORA MISMO
+  const term = document.getElementById('searchInput').value.trim().toLowerCase();
+  currentQuery = term;
+
+  // 2. Lógica de "Toggle" (Poner y quitar filtro)
+  if (btn.classList.contains('active')) {
+    // Si ya estaba activo y lo vuelvo a presionar, quito el filtro
+    btn.classList.remove('active');
+    currentFilter = '';
+  } else {
+    // Si no estaba activo, limpio los demás y activo este
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = cls;
+  }
+  
+  runQuery(currentQuery, currentFilter);
+}
+
+function searchByClass(cls) {
+  // Limpiar la barra de búsqueda para enfocar solo en la clase
+  document.getElementById('searchInput').value = '';
+  currentQuery = '';
+  currentFilter = cls;
+  
+  // Limpiar botones y activar el correcto
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active');
+    // Activa el botón si su texto incluye el nombre de la clase
+    if(b.textContent.includes(cls)) {
+      b.classList.add('active');
+    }
+  });
+
+  runQuery('', cls);
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+
+function setFilter(cls, btn) {
   currentFilter = cls;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -249,55 +288,27 @@ async function runQuery(term, claseFilter) {
   try {
     const container = document.getElementById('results');
     
-    // 1. Mostrar estado de carga unificado
+    // 1. Mostrar estado de carga solo para local
     container.innerHTML = `
       <div style="text-align:center; padding:40px;">
         <div class="spinner"></div>
-        <p style="margin-top:15px; color:var(--accent);">Realizando búsqueda Híbrida (Local + DBpedia)...</p>
+        <p style="margin-top:15px; color:var(--accent);">Buscando en ontología local...</p>
       </div>`;
     document.getElementById('resultsCount').innerHTML = 'Buscando...';
 
-    // 2. Hacer las DOS peticiones AL MISMO TIEMPO (Promise.all)
-    const fetchLocal = fetch(`${API}/buscar?${params}`, { signal: AbortSignal.timeout(15000) })
-                        .then(r => r.json()).catch(e => ({ok: false, error: e.message}));
+    // 2. Hacer ÚNICAMENTE la petición local
+    const resp = await fetch(`${API}/buscar?${params}`, { signal: AbortSignal.timeout(15000) });
+    const dataLocal = await resp.json();
 
-    let fetchDbpedia = Promise.resolve({ok: true, resultados: []});
-    if (term) {
-       // Solo buscamos en DBpedia si el usuario escribió una palabra en el buscador
-       fetchDbpedia = fetch(`${API}/dbpedia?term=${encodeURIComponent(term)}`, { signal: AbortSignal.timeout(60000) })
-                       .then(r => r.json()).catch(e => ({ok: false, error: e.message}));
-    }
-
-    const [dataLocal, dataDbpedia] = await Promise.all([fetchLocal, fetchDbpedia]);
-
-    // 3. Renderizar primero las tarjetas locales
+    // 3. Renderizar solo las tarjetas locales
     if (dataLocal.ok) {
       renderResults(dataLocal.resultados, term); 
     } else {
       renderError(dataLocal.error);
     }
 
-    // 4. Si DBpedia trajo resultados, los ADJUNTAMOS debajo de los locales
-    if (term && dataDbpedia.ok && dataDbpedia.resultados && dataDbpedia.resultados.length > 0) {
-       const dbpCardsHtml = generateDbpCardsHtml(dataDbpedia.resultados);
-       
-       // Agregamos un separador y las tarjetas de DBpedia al mismo contenedor
-       container.innerHTML += `
-         <div style="margin-top:40px; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid var(--accent3); display:flex; align-items:center; gap:10px;">
-           <span style="font-size:24px;">🌐</span>
-           <h3 style="color:var(--accent3); margin:0;">Resultados Externos (DBpedia)</h3>
-         </div>
-         ${dbpCardsHtml}
-       `;
-
-       // Sumamos ambos contadores en la interfaz
-       const localTotal = dataLocal.resultados ? dataLocal.resultados.length : 0;
-       const dbpTotal   = dataDbpedia.resultados.length;
-       document.getElementById('resultsCount').innerHTML = `<span>${localTotal + dbpTotal}</span> resultados totales · <span style="color:var(--accent3)">Búsqueda Híbrida</span>`;
-    }
-
   } catch(e) {
-    renderError('Error general de conexión: ' + e.message);
+    renderError('Error de conexión local: ' + e.message);
   }
 }
 
@@ -468,7 +479,7 @@ function switchTab(tab) {
 }
 
 // ══════════════════════════════════════════════
-// DBPEDIA — llama al backend SPARQLWrapper
+// DBPEDIA — llama al backend SPARQLWrapper (CON CACHÉ)
 // ══════════════════════════════════════════════
 function dbpQuick(term) {
   document.getElementById('dbpSearchInput').value = term;
@@ -479,17 +490,47 @@ async function doDbpSearch() {
   const term = document.getElementById('dbpSearchInput').value.trim();
   if (!term) return;
 
-  // Muestra la consulta SPARQL
+  // Muestra la consulta SPARQL y estado de carga
   updateDbpSparqlPanel(term);
   showDbpLoading(term);
 
+  // CLAVE PARA EL CACHÉ: Identificador único para esta búsqueda
+  const cacheKey = `dbpedia_cache_${term.toLowerCase()}`;
+
   try {
+    // 1. INTENTAR LEER DEL CACHÉ LOCAL PRIMERO
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      console.log(`[Caché] Cargando resultados de DBpedia para "${term}" desde memoria local.`);
+      const data = JSON.parse(cachedData);
+      
+      // Añadimos un pequeño retraso artificial (300ms) solo para que se note
+      // visualmente el cambio, pero simulando velocidad de caché
+      setTimeout(() => {
+        if (data.ok) {
+          renderDbpResults(data.resultados, term);
+          // Modificamos el contador para mostrar que vino del caché
+          document.getElementById('dbpResultsCount').innerHTML = 
+            `<span>${data.resultados.length}</span> resultado${data.resultados.length !== 1 ? 's' : ''} · <span style="color:var(--success)">⚡ Cargado desde Caché Local</span>`;
+        } else {
+          showDbpError(term, data.error);
+        }
+      }, 300);
+      return; // Detenemos la ejecución aquí, no llamamos al servidor
+    }
+
+    // 2. SI NO HAY CACHÉ, LLAMAR AL SERVIDOR BACKEND
+    console.log(`[Red] Consultando al servidor backend para "${term}"...`);
     const resp = await fetch(`${API}/dbpedia?term=${encodeURIComponent(term)}`, {
       signal: AbortSignal.timeout(50000)
     });
+    
     const data = await resp.json();
 
     if (data.ok) {
+      // 3. GUARDAR EL RESULTADO EN CACHÉ PARA LA PRÓXIMA VEZ
+      localStorage.setItem(cacheKey, JSON.stringify(data));
       renderDbpResults(data.resultados, term);
     } else {
       showDbpError(term, data.error);

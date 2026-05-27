@@ -111,18 +111,31 @@ def cargar_archivo():
 def buscar_local():
     if not ontologia_cargada:
         return jsonify({"ok": False, "error": "Ontología no cargada"}), 400
+    
     term         = request.args.get("term",  "").strip().lower()
     clase_filtro = request.args.get("clase", "").strip().lower()
     resultados = []
+
+    # 1. Dividimos el término de búsqueda en palabras individuales (tokens)
+    tokens_busqueda = term.split() if term else []
+
     for ind in individuos_cache:
+        # Filtro por clase
         if clase_filtro and clase_filtro not in ind["clase"].lower():
             continue
-        if term:
+            
+        # Filtro por término de búsqueda (Tokenización)
+        if tokens_busqueda:
             texto = (ind["nombre"] + " " + ind["clase"] + " " +
                      " ".join(str(v) for v in ind["propiedades"].values())).lower()
-            if term not in texto:
+            
+            # 2. Verificamos que TODAS las palabras existan en el texto
+            # Usamos all() para asegurar que coincida "gas" Y "cocina" en cualquier orden
+            if not all(token in texto for token in tokens_busqueda):
                 continue
+                
         resultados.append(ind)
+        
     return jsonify({"ok": True, "term": term,
                     "total": len(resultados), "resultados": resultados[:200]})
 
