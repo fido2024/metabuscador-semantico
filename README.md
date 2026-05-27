@@ -1,52 +1,85 @@
-# 🔍 MetaBuscador Semántico — Electrodomésticos
- 
-**Práctica 2do Parcial · Web Semántica · UMSS**
- 
-Metabuscador semántico basado en OWL + SPARQL para el dominio de electrodomésticos.
- 
-##  Cómo usar
- 
-1. Abrir `index.html` en cualquier navegador moderno
-2. Arrastrar el archivo `ontologia/web-semanticas.owx` al área de carga
-3. ¡Buscar!
-##  Estructura
- 
-```
-metabuscador-semantico/
-├── index.html          ← Página principal
-├── css/
-│   └── style.css       ← Estilos (modo claro/oscuro)
-├── js/
-│   └── app.js          ← Lógica: parser OWL, motor fuzzy, SPARQL
-└── ontologia/
-    └── web-semanticas.owx  ← Ontología OWL de electrodomésticos
-```
- 
-##  Características
- 
-- **Sin backend ni DBMS** — todo corre en el navegador (HTML5)
-- **Parser OWL** — lee el archivo `.owx` directamente con DOMParser
-- **SPARQL** — cada búsqueda genera una consulta SPARQL visible
-- **Búsqueda Fuzzy** — algoritmo Levenshtein + sinónimos + tokens desordenados
-- **Modo claro/oscuro** — toggle persistente
-- **Filtros por clase** — navega por categorías semánticas
-- **Ranking por relevancia** — resultados ordenados por % de coincidencia
-##  Tecnologías
- 
-| Tecnología | Uso |
-|-----------|-----|
-| HTML5 | Estructura y APIs nativas (DOMParser, FileReader, Drag & Drop) |
-| CSS3 | Diseño responsivo con variables CSS para temas |
-| JavaScript ES6+ | Lógica de búsqueda, parser OWL, motor fuzzy |
-| OWL/XML | Formato de la ontología |
-| SPARQL | Lenguaje de consulta semántica |
- 
-##  Integrantes
- 
-- Vasquez Carata Fidel
-- [Nombre 2]
-- [Nombre 3]
-- [Nombre 4]
-- [Nombre 5]
+# Metabuscador Semántico - Electrodomésticos
+
+Proyecto de Web Semántica desarrollado para la Universidad Mayor de San Simón (UMSS). El sistema permite realizar búsquedas híbridas sobre una ontología local (.owx) y el grafo de conocimiento global de DBpedia.
+
 ---
-*UMSS · Carrera de Sistemas · Web Semántica 2025*
+
+## 🚀 Requisitos previos
+
+Para ejecutar el proyecto, asegúrate de tener instalado:
+
+- [Python 3.x](https://www.python.org/downloads/)
+- Navegador web moderno (Chrome, Firefox o Edge)
+
+---
+
+## 🛠️ Guía de Instalación y Ejecución
+
+### 1. Configurar el Backend (Python)
+
+El backend gestiona las consultas SPARQL hacia DBpedia y sirve como puente semántico.
+
+1. Abre una terminal y dirígete a la carpeta `backend`:
+
+```bash
+cd backend
+```
+
+2. Instala las dependencias necesarias:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Ejecuta el servidor:
+
+```bash
+python server.py
+```
+
+El servidor iniciará en:
+
+```txt
+http://127.0.0.1:5000
+```
+
+---
+
+### 2. Ejecutar el Frontend
+
+El frontend es una aplicación cliente que procesa la ontología local.
+
+1. Asegúrate de que el backend esté ejecutándose.
+
+2. Abre la carpeta `frontend`.
+
+3. Abre el archivo `index.html` en tu navegador.
+
+> Recomendación: Si usas VS Code, utiliza la extensión **Live Server** para abrir el archivo.  
+> Si lo abres directamente como archivo local, asegúrate de que el backend esté activo para permitir la comunicación.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```txt
+/backend    -> Lógica de Python, servidor Flask y consultas SPARQL
+/frontend   -> Interfaz de usuario (HTML, CSS y JS)
+/ontologia  -> Archivo fuente web-semanticas.owx
+```
+
+---
+
+## ⚙️ Notas Técnicas
+
+- **Arquitectura:** Cliente 100% (Frontend) + Servidor Proxy (Backend).
+- **Tecnologías:** Flask, SPARQLWrapper, DOMParser API, CSS Vanilla.
+- **Consulta de errores:**  
+  Si el buscador no carga resultados, presiona `F12` en tu navegador y revisa la pestaña `Console` para verificar la comunicación con el servidor.
+
+---
+
+## 🎓 Información Académica
+
+Desarrollado para la materia de **Web Semántica - UMSS 2026**.
+
